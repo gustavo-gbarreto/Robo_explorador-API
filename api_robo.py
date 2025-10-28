@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 # Esta variável de ambiente é injetada pelo docker-compose.yml
 # "mongo_db" é o nome do serviço do banco de dados no docker-compose
-MONGO_URI = os.environ.get('MONGO_URI', "mongodb://root:example@mongo:27017/robo_db?authSource=admin")
+MONGO_URI = os.environ.get('MONGO_URI', "mongodb+srv://MiniProjeto-DB:teste123@cluster-miniprojeto-v1.ob8km8s.mongodb.net/Robo_explorador?retryWrites=true&w=majority")
 
 try:
     # Tenta conectar ao MongoDB
@@ -34,12 +34,20 @@ except ConnectionFailure as e:
 
 @app.route('/', methods=['GET'])
 def index():
-    """Retorna uma página inicial amigável."""
-    return """
-    <h1>API do Robô Explorador (Docker + MongoDB)</h1>
-    <p>API está funcionando e conectada ao MongoDB.</p>
-    <p>Use <code>GET /leituras</code> para ver os dados ou <code>POST /leituras</code> para enviar.</p>
-    """
+    """Retorna as últimas 100 leituras do banco de dados na ROTA RAIZ."""
+    try:
+        # Busca os dados, ordena pelo campo "_id" decrescente (mais novos primeiro)
+        # O _id do 
+# Mongo contém um timestamp, então ordenar por ele é eficiente
+        cursor = leituras_collection.find().sort("_id", -1).limit(100) #[cite: 69]
+        
+        # Converte os resultados BSON do MongoDB para uma lista JSON válida
+        # json_util.dumps cria uma string JSON, json.loads converte de volta para lista/dict
+        leituras_json = json.loads(json_util.dumps(cursor))
+        
+        return jsonify(leituras_json), 200
+    except Exception as e:
+        return jsonify({"erro": f"Erro ao buscar dados: {str(e)}"}), 500
 
 @app.route('/leituras', methods=['POST'])
 def adicionar_leitura():

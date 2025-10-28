@@ -1,2 +1,3 @@
-Flask
-pymongo
+flask
+pymongo[srv] # O [srv] é crucial para permitir conexões mongodb+srv:// (Atlas)
+bson

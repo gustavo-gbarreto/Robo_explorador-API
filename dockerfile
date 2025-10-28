@@ -1,20 +1,21 @@
-# 1. Imagem base
-FROM python:3.9-slim
+# 1. Imagem base do Python
+# Usamos 'slim' para uma imagem menor e mais leve
+FROM python:3.10-slim
 
-# 2. Define o diretório de trabalho
+# 2. Define o diretório de trabalho dentro do contêiner
 WORKDIR /app
 
-# 3. Copia o arquivo de dependências
-COPY requirements.txt .
+# 3. Copia o arquivo de requisitos
+COPY requirements.txt requirements.txt
 
-# 4. Instala as dependências
+# 4. Instala as dependências do Python
+#    --no-cache-dir: não guarda o cache para manter a imagem leve
+#    -r requirements.txt: instala tudo que está no arquivo
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Copia todo o código da API para o contêiner
+# 5. Copia o resto dos arquivos do projeto (o seu app.py)
 COPY . .
 
-# 6. Expõe a porta que o Flask usa
-EXPOSE 5000
-
-# 7. Comando para rodar a API ao iniciar o contêiner
-CMD ["python", "api_robo.py"]
+# 6. Comando para rodar a aplicação quando o contêiner iniciar
+#    Executa o app.py usando o python
+CMD ["python", "app.py"]

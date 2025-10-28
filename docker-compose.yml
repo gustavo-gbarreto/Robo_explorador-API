@@ -1,49 +1,26 @@
 version: '3.8'
 
 services:
-  # Serviço 1: API Flask
+  # 1. Definição do serviço da sua API
   api:
-    build: .
+    build: . # Constrói a imagem usando o Dockerfile na pasta atual
+    container_name: robo_explorador_api
     ports:
-      - "5000:5000"
+      - "5000:5000" # Expõe a porta 5000 do contêiner para a porta 5000 da sua máquina
     environment:
-      # ATENÇÃO AQUI: Esta é a nova URI de conexão.
-      # Ela agora inclui o usuário (root), a senha (example) e o serviço (mongo).
-      # O ?authSource=admin é necessário para autenticar o usuário root.
-      - MONGO_URI=mongodb://root:example@mongo:27017/robo_db?authSource=admin
+      - MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/<database>?retryWrites=true&w=majority
     depends_on:
-      - mongo  # Depende do serviço 'mongo' (o nome que você deu)
-    restart: unless-stopped
+      - mongo
 
-  # Serviço 2: Banco de Dados MongoDB (O seu serviço)
+  # 2. Serviço opcional para MongoDB local (caso precise para testes)
   mongo:
-    image: mongo
-    restart: always
+    image: mongo:5.0
+    container_name: mongo
     ports:
-      # Corrigido de 2017 para 27017 (porta padrão do Mongo)
       - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-    volumes:
-      # Adicionei esta linha para persistir seus dados
-      - mongo-data:/data/db
+    networks:
+      - robo_network
 
-  # Serviço 3: Interface Gráfica (O seu serviço)
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - "8081:8081"
-    environment:
-      # Esta configuração já estava correta
-      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
-      ME_CONFIG_BASICAUTH_ENABLED: true
-      ME_CONFIG_BASICAUTH_USERNAME: mongoexpressuser
-      ME_CONFIG_BASICAUTH_PASSWORD: mongoexpresspass
-    depends_on:
-      - mongo # Garante que o mongo-express inicie depois do banco
-
-# Volume para persistir os dados do banco
-volumes:
-  mongo-data:
+networks:
+  robo_network:
+    driver: bridge
